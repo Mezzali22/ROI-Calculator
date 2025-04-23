@@ -2,199 +2,119 @@ import React, { useState } from 'react';
 
 export default function ROICalculator() {
   const [totalViewers, setTotalViewers] = useState(4000000000);
+  const [emeaV2F, setEmeaV2F] = useState(0.015);
+  const [apacV2F, setApacV2F] = useState(0.005);
+  const [americasV2F, setAmericasV2F] = useState(0.008);
+  const [emeaF2S, setEmeaF2S] = useState(0.25);
+  const [apacF2S, setApacF2S] = useState(0.12);
+  const [americasF2S, setAmericasF2S] = useState(0.2);
+  const [winterUplift, setWinterUplift] = useState(0.04);
+  const [summerUplift, setSummerUplift] = useState(0.08);
+  const [activationRatio, setActivationRatio] = useState(1);
   const [arpu, setArpu] = useState(66.12);
-  const [totalPartnershipFee, setTotalPartnershipFee] = useState(426000000);
-
-  const [emeaV2F, setEmeaV2F] = useState(1.5);
-  const [apacV2F, setApacV2F] = useState(0.5);
-  const [amerV2F, setAmerV2F] = useState(0.8);
-
-  const [emeaF2S, setEmeaF2S] = useState(25);
-  const [apacF2S, setApacF2S] = useState(12);
-  const [amerF2S, setAmerF2S] = useState(20);
-
-  const [winterUplift, setWinterUplift] = useState(4);
-  const [summerUplift, setSummerUplift] = useState(8);
-  const [activationRatio, setActivationRatio] = useState(100);
+  const [fee, setFee] = useState(426000000);
 
   const applyPreset = () => {
-    setArpu(66.12);
-    setTotalPartnershipFee(426000000);
     setTotalViewers(4000000000);
-    setEmeaV2F(1.5);
-    setApacV2F(0.5);
-    setAmerV2F(0.8);
-    setEmeaF2S(25);
-    setApacF2S(12);
-    setAmerF2S(20);
-    setWinterUplift(4);
-    setSummerUplift(8);
-    setActivationRatio(100);
+    setEmeaV2F(0.015);
+    setApacV2F(0.005);
+    setAmericasV2F(0.008);
+    setEmeaF2S(0.25);
+    setApacF2S(0.12);
+    setAmericasF2S(0.2);
+    setWinterUplift(0.04);
+    setSummerUplift(0.08);
+    setActivationRatio(1);
+    setArpu(66.12);
+    setFee(426000000);
   };
 
-  const calculateROI = () => {
-    const v2fTotal = (
-      (totalViewers * emeaV2F) / 100 +
-      (totalViewers * apacV2F) / 100 +
-      (totalViewers * amerV2F) / 100
-    );
+  // ---- Calculation ----
+  const emeaF2SCount = totalViewers * 0.35 * emeaV2F * emeaF2S;
+  const apacF2SCount = totalViewers * 0.45 * apacV2F * apacF2S;
+  const americasF2SCount = totalViewers * 0.2 * americasV2F * americasF2S;
+  const totalSubsRevenue = (emeaF2SCount + apacF2SCount + americasF2SCount) * arpu * 6;
 
-    const convertedSubscribers = (
-      (v2fTotal * ((emeaF2S / 100 + apacF2S / 100 + amerF2S / 100)) *
-        (activationRatio / 100)) /
-      3
-    );
+  const winterAdRevenue = (2170000000 + 2457000000) * winterUplift;
+  const summerAdRevenue = (2305000000 + 2645000000) * summerUplift;
+  const totalAdRevenue = winterAdRevenue + summerAdRevenue;
 
-    const upliftMultiplier = 1 + (winterUplift + summerUplift) / 200;
-    const revenue = convertedSubscribers * arpu * upliftMultiplier;
-    const roi = ((revenue - totalPartnershipFee) / totalPartnershipFee) * 100;
-
-    return {
-      revenue: revenue.toFixed(2),
-      roi: roi.toFixed(2),
-    };
-  };
-
-  const { revenue, roi } = calculateROI();
-
-  const sliders = [
-    {
-      label: 'Total Viewers',
-      value: totalViewers,
-      min: 1000000000,
-      max: 5000000000,
-      step: 100000000,
-      setter: setTotalViewers,
-    },
-    {
-      label: 'EMEA V2F %',
-      value: emeaV2F,
-      min: 1,
-      max: 1.5,
-      step: 0.01,
-      setter: setEmeaV2F,
-    },
-    {
-      label: 'APAC V2F %',
-      value: apacV2F,
-      min: 0.45,
-      max: 0.5,
-      step: 0.01,
-      setter: setApacV2F,
-    },
-    {
-      label: 'Americas V2F %',
-      value: amerV2F,
-      min: 0.75,
-      max: 0.8,
-      step: 0.01,
-      setter: setAmerV2F,
-    },
-    {
-      label: 'EMEA F2S %',
-      value: emeaF2S,
-      min: 18,
-      max: 25,
-      step: 1,
-      setter: setEmeaF2S,
-    },
-    {
-      label: 'APAC F2S %',
-      value: apacF2S,
-      min: 5,
-      max: 12,
-      step: 1,
-      setter: setApacF2S,
-    },
-    {
-      label: 'Americas F2S %',
-      value: amerF2S,
-      min: 12,
-      max: 20,
-      step: 1,
-      setter: setAmerF2S,
-    },
-    {
-      label: 'Winter Uplift %',
-      value: winterUplift,
-      min: 2,
-      max: 4,
-      step: 0.01,
-      setter: setWinterUplift,
-    },
-    {
-      label: 'Summer Uplift %',
-      value: summerUplift,
-      min: 5,
-      max: 8,
-      step: 0.01,
-      setter: setSummerUplift,
-    },
-    {
-      label: 'Activation Ratio: 100.00%',
-      value: activationRatio,
-      min: 80,
-      max: 120,
-      step: 1,
-      setter: setActivationRatio,
-    },
-  ];
+  const totalRevenue = totalSubsRevenue + totalAdRevenue;
+  const totalInvestment = fee * (1 + activationRatio);
+  const totalProfit = totalRevenue - totalInvestment;
+  const roi = (totalProfit / totalInvestment) * 100;
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-4">ROI Calculator</h1>
-      <button
-        onClick={applyPreset}
-        className="mb-4 px-4 py-2 bg-blue-700 text-white rounded shadow"
-      >
-        Apply Preset
-      </button>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {sliders.map(({ label, value, min, max, step, setter }) => (
-          <div key={label} className="bg-white p-4 rounded shadow">
-            <label className="block font-semibold mb-2">{label}</label>
-            <input
-              type="range"
-              min={min}
-              max={max}
-              step={step}
-              value={value}
-              onChange={(e) => setter(Number(e.target.value))}
-              className="w-full"
-            />
-            <div className="text-right font-medium">
-              {label.includes('%') ? `${value.toFixed(2)}%` : value}
-            </div>
-          </div>
-        ))}
-
-        <div className="bg-white p-4 rounded shadow">
-          <label className="block font-semibold mb-2">ARPU</label>
-          <input
-            type="number"
-            value={arpu}
-            onChange={(e) => setArpu(Number(e.target.value))}
-            className="w-full border rounded px-2 py-1"
-          />
-        </div>
-
-        <div className="bg-white p-4 rounded shadow">
-          <label className="block font-semibold mb-2">Total Partnership Fee</label>
-          <input
-            type="number"
-            value={totalPartnershipFee}
-            onChange={(e) => setTotalPartnershipFee(Number(e.target.value))}
-            className="w-full border rounded px-2 py-1"
-          />
-        </div>
+    <div className="p-6 max-w-screen-xl mx-auto">
+      <h1 className="text-3xl font-bold text-center mb-4">ROI Calculator</h1>
+      <div className="text-center mb-6">
+        <button onClick={applyPreset} className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+          Apply Preset
+        </button>
       </div>
 
-      <div className="mt-8 bg-blue-50 p-6 rounded shadow">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-8">
+        <Input label="Total Viewers" value={totalViewers} setValue={setTotalViewers} isSlider={false} />
+        <Slider label="EMEA V2F %" value={emeaV2F} setValue={setEmeaV2F} min={0.01} max={0.015} />
+        <Slider label="APAC V2F %" value={apacV2F} setValue={setApacV2F} min={0.0045} max={0.005} />
+        <Slider label="Americas V2F %" value={americasV2F} setValue={setAmericasV2F} min={0.0075} max={0.008} />
+        <Slider label="EMEA F2S %" value={emeaF2S} setValue={setEmeaF2S} min={0.18} max={0.25} />
+        <Slider label="APAC F2S %" value={apacF2S} setValue={setApacF2S} min={0.05} max={0.12} />
+        <Slider label="Americas F2S %" value={americasF2S} setValue={setAmericasF2S} min={0.12} max={0.2} />
+        <Slider label="Winter Uplift %" value={winterUplift} setValue={setWinterUplift} min={0.02} max={0.04} />
+        <Slider label="Summer Uplift %" value={summerUplift} setValue={setSummerUplift} min={0.05} max={0.08} />
+        <Slider label="Activation Ratio" value={activationRatio} setValue={setActivationRatio} min={0.8} max={1.2} />
+        <Input label="ARPU" value={arpu} setValue={setArpu} />
+        <Input label="Total Partnership Fee" value={fee} setValue={setFee} />
+      </div>
+
+      <div className="bg-blue-50 p-6 rounded-lg shadow-md text-blue-900 space-y-2 max-w-2xl mx-auto">
         <h2 className="text-xl font-semibold mb-2">Results</h2>
-        <p><strong>Estimated Revenue:</strong> ${revenue}</p>
-        <p><strong>ROI:</strong> {roi}%</p>
+        <p><strong>Total Subscription Revenue:</strong> ${totalSubsRevenue.toLocaleString()}</p>
+        <p><strong>Total Advertising Revenue:</strong> ${totalAdRevenue.toLocaleString()}</p>
+        <p><strong>Total Revenue Uplift:</strong> ${totalRevenue.toLocaleString()}</p>
+        <p><strong>Total Investment:</strong> ${totalInvestment.toLocaleString()}</p>
+        <p><strong>Total Profit:</strong> ${totalProfit.toLocaleString()}</p>
+        <p className="text-lg font-bold">ROI: {roi.toFixed(2)}%</p>
       </div>
+    </div>
+  );
+}
+
+function Slider({ label, value, setValue, min, max }) {
+  return (
+    <div>
+      <label className="block mb-1 font-medium">{label}</label>
+      <input
+        type="range"
+        value={value}
+        min={min}
+        max={max}
+        step="0.0001"
+        onChange={(e) => setValue(Number(e.target.value))}
+        className="w-full accent-blue-600"
+      />
+      <input
+        type="number"
+        value={value}
+        onChange={(e) => setValue(Number(e.target.value))}
+        step="0.0001"
+        className="border w-full mt-1 p-1 rounded"
+      />
+    </div>
+  );
+}
+
+function Input({ label, value, setValue, isSlider = true }) {
+  return (
+    <div>
+      <label className="block mb-1 font-medium">{label}</label>
+      <input
+        type="number"
+        value={value}
+        onChange={(e) => setValue(Number(e.target.value))}
+        className="border w-full p-1 rounded"
+      />
     </div>
   );
 }
