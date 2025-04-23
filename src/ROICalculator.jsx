@@ -34,15 +34,20 @@ export default function ROICalculator() {
 
   const format = (val) => "$" + Number(val).toLocaleString(undefined, { maximumFractionDigits: 0 });
 
+  // Calculation
   const emeaSubs = totalViewers * 0.35 * emeaV2F * emeaF2S;
   const apacSubs = totalViewers * 0.45 * apacV2F * apacF2S;
   const amerSubs = totalViewers * 0.2 * amerV2F * amerF2S;
   const totalSubs = emeaSubs + apacSubs + amerSubs;
+
   const subscriptionRevenue = totalSubs * arpu * 6;
 
   const winterBase = 2170000000 + 2457000000;
   const summerBase = 2305000000 + 2645000000;
-  const advertisingRevenue = winterBase * winterUplift + summerBase * summerUplift;
+
+  const winterAdRev = winterBase * winterUplift;
+  const summerAdRev = summerBase * summerUplift;
+  const advertisingRevenue = winterAdRev + summerAdRev;
 
   const totalRevenue = subscriptionRevenue + advertisingRevenue;
   const investment = fee * (1 + activationRatio);
@@ -60,7 +65,7 @@ export default function ROICalculator() {
           step={step}
           value={value}
           onChange={(e) => setValue(parseFloat(e.target.value))}
-          className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer
+          className="w-full h-2 bg-blue-300 rounded-lg appearance-none cursor-pointer
             [&::-webkit-slider-thumb]:appearance-none
             [&::-webkit-slider-thumb]:w-4
             [&::-webkit-slider-thumb]:h-4
