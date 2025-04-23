@@ -1,22 +1,21 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 
 export default function ROICalculator() {
   const [totalViewers, setTotalViewers] = useState(4000000000);
-  const [arpu, setArpu] = useState(56.16);
-  const [fee, setFee] = useState(486000000);
+  const [arpu, setArpu] = useState(66.12);
+  const [fee, setFee] = useState(426000000);
 
-  const [emV2F, setEmV2F] = useState(1.5);
-  const [apV2F, setApV2F] = useState(0.5);
-  const [amV2F, setAmV2F] = useState(0.8);
+  const [emeaV2F, setEmeaV2F] = useState(0.015);
+  const [apacV2F, setApacV2F] = useState(0.005);
+  const [amerV2F, setAmerV2F] = useState(0.008);
 
-  const [emF2S, setEmF2S] = useState(25);
-  const [apF2S, setApF2S] = useState(12);
-  const [amF2S, setAmF2S] = useState(20);
+  const [emeaF2S, setEmeaF2S] = useState(0.25);
+  const [apacF2S, setApacF2S] = useState(0.12);
+  const [amerF2S, setAmerF2S] = useState(0.2);
 
-  const [winterUplift, setWinterUplift] = useState(4);
-  const [summerUplift, setSummerUplift] = useState(8);
-  const [activationRatio, setActivationRatio] = useState(100);
+  const [winterUplift, setWinterUplift] = useState(0.04);
+  const [summerUplift, setSummerUplift] = useState(0.08);
+  const [activationRatio, setActivationRatio] = useState(1.0);
 
   const applyPreset = () => {
     setArpu(66.12);
@@ -24,89 +23,71 @@ export default function ROICalculator() {
   };
 
   const calculateROI = () => {
-    const v2fTotal = (
-      (totalViewers * emV2F) / 100 +
-      (totalViewers * apV2F) / 100 +
-      (totalViewers * amV2F) / 100
-    );
+    const v2fTotal =
+      (totalViewers * emeaV2F + totalViewers * apacV2F + totalViewers * amerV2F) / 3;
 
-    const convertedSubscribers = (
-      v2fTotal *
-      ((emF2S / 100 + apF2S / 100 + amF2S / 100) *
-        (activationRatio / 100)) /
-      3
-    );
+    const convertedSubscribers =
+      ((emeaF2S + apacF2S + amerF2S) / 3) * (v2fTotal * activationRatio);
 
-    const upliftMultiplier = 1 + (winterUplift + summerUplift) / 200;
+    const upliftMultiplier = 1 + (winterUplift + summerUplift);
+
     const revenue = convertedSubscribers * arpu * upliftMultiplier;
+    const roi = ((revenue - fee) / fee) * 100;
 
     return {
-      roi: ((revenue - fee) / fee) * 100,
       revenue: revenue.toFixed(2),
+      roi: roi.toFixed(2),
     };
   };
 
-  const { roi, revenue } = calculateROI();
+  const { revenue, roi } = calculateROI();
 
-  const labelClass = 'block font-medium text-gray-700 mb-1';
-  const sliderClass = 'border px-2 py-1 rounded w-full';
+  const labelClass = "block font-medium text-gray-700 mb-1";
+  const inputClass = "w-full border px-2 py-1 rounded";
+  const sliderClass = "w-full accent-indigo-600";
+
+  const variables = [
+    { label: "totalViewers", val: totalViewers, setter: setTotalViewers, min: 1000000, max: 10000000000 },
+    { label: "emeaV2FPercentage", val: emeaV2F, setter: setEmeaV2F, min: 0.01, max: 0.015 },
+    { label: "apacV2FPercentage", val: apacV2F, setter: setApacV2F, min: 0.0045, max: 0.005 },
+    { label: "americasV2FPercentage", val: amerV2F, setter: setAmerV2F, min: 0.0075, max: 0.008 },
+    { label: "emeaF2SPercentage", val: emeaF2S, setter: setEmeaF2S, min: 0.18, max: 0.25 },
+    { label: "apacF2SPercentage", val: apacF2S, setter: setApacF2S, min: 0.05, max: 0.12 },
+    { label: "americasF2SPercentage", val: amerF2S, setter: setAmerF2S, min: 0.12, max: 0.2 },
+    { label: "arpu", val: arpu, setter: setArpu, min: 30, max: 100 },
+    { label: "winterUpliftRate", val: winterUplift, setter: setWinterUplift, min: 0.02, max: 0.04 },
+    { label: "summerUpliftRate", val: summerUplift, setter: setSummerUplift, min: 0.05, max: 0.08 },
+    { label: "totalPartnershipFee", val: fee, setter: setFee, min: 100000000, max: 600000000 },
+    { label: "activationRatio", val: activationRatio, setter: setActivationRatio, min: 0.8, max: 1.2 },
+  ];
 
   return (
-    <div className="max-w-5xl mx-auto p-6 font-sans">
-      <h1 className="text-3xl font-bold text-center mb-6">ROI Calculator</h1>
-      <div className="flex justify-center gap-4 mb-4">
-        <button onClick={applyPreset} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Apply Preset</button>
-        <Link to="/logistics" className="text-purple-700 underline self-center">Calculation Logistics →</Link>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div>
-          <label className={labelClass}>Total Viewers</label>
-          <input type="number" value={totalViewers} onChange={e => setTotalViewers(+e.target.value)} className={sliderClass} />
-        </div>
-        <div>
-          <label className={labelClass}>ARPU</label>
-          <input type="number" step="0.01" value={arpu} onChange={e => setArpu(+e.target.value)} className={sliderClass} />
-        </div>
-        <div>
-          <label className={labelClass}>Total Partnership Fee</label>
-          <input type="number" value={fee} onChange={e => setFee(+e.target.value)} className={sliderClass} />
-        </div>
-      </div>
-
-      {/* Sliders */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        {[
-          ['EMEA V2F %', emV2F, setEmV2F, 1, 1.5],
-          ['APAC V2F %', apV2F, setApV2F, 0.45, 0.5],
-          ['Americas V2F %', amV2F, setAmV2F, 0.75, 0.8],
-          ['EMEA F2S %', emF2S, setEmF2S, 18, 25],
-          ['APAC F2S %', apF2S, setApF2S, 5, 12],
-          ['Americas F2S %', amF2S, setAmF2S, 12, 20],
-          ['Winter Uplift %', winterUplift, setWinterUplift, 2, 4],
-          ['Summer Uplift %', summerUplift, setSummerUplift, 5, 8],
-          ['Activation Ratio', activationRatio, setActivationRatio, 80, 100],
-        ].map(([label, val, setter, min, max], i) => (
+    <div className="p-6 max-w-3xl mx-auto font-sans">
+      <h1 className="text-3xl font-bold mb-4">ROI Calculator</h1>
+      <button onClick={applyPreset} className="bg-indigo-900 text-white px-4 py-2 rounded mb-6">
+        Apply Preset
+      </button>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        {variables.map(({ label, val, setter, min, max }) => (
           <div key={label}>
-            <label className={labelClass}>{label}: {val.toFixed(2)}%</label>
+            <label className={labelClass}>{label}</label>
             <input
               type="range"
               min={min}
               max={max}
-              step="0.01"
+              step="0.0001"
               value={val}
-              onChange={e => setter(+e.target.value)}
+              onChange={(e) => setter(parseFloat(e.target.value))}
               className={sliderClass}
             />
+            <p>{label.includes("Percentage") || label.includes("Rate") ? `${(val * 100).toFixed(2)}%` : val}</p>
           </div>
         ))}
       </div>
-
-      {/* Results */}
       <div className="bg-blue-50 p-6 rounded shadow text-lg">
         <h2 className="text-xl font-semibold mb-2">Results</h2>
         <p>Estimated Revenue: ${revenue}</p>
-        <p>ROI: {roi.toFixed(2)}%</p>
+        <p>ROI: {roi}%</p>
       </div>
     </div>
   );
