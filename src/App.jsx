@@ -1,5 +1,5 @@
 import React from "react";
-import ROICalculator from "./components/ROICalculator";
+import ROICalculator from "./ROICalculator";
 
 export default function App() {
   return (
