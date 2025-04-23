@@ -1,10 +1,14 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import './index.css'
-import ROICalculator from './ROICalculator'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import ROICalculator from './ROICalculator';
+import LogisticsPage from './LogisticsPage';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <ROICalculator />
-  </React.StrictMode>
-)
+  <BrowserRouter>
+    <Routes>
+      <Route path="/" element={<ROICalculator />} />
+      <Route path="/logistics" element={<LogisticsPage />} />
+    </Routes>
+  </BrowserRouter>
+);
