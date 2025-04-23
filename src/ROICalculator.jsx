@@ -1,125 +1,155 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-const ROICalculator = () => {
+export default function ROICalculator() {
   const [totalViewers, setTotalViewers] = useState(4000000000);
   const [arpu, setArpu] = useState(66.12);
   const [fee, setFee] = useState(426000000);
 
-  const [emeaV2F, setEmeaV2F] = useState(0.015);
-  const [apacV2F, setApacV2F] = useState(0.005);
-  const [amerV2F, setAmerV2F] = useState(0.008);
+  const [emv2f, setEmv2f] = useState(1.5);
+  const [apv2f, setApv2f] = useState(0.5);
+  const [amv2f, setAmv2f] = useState(0.8);
 
-  const [emeaF2S, setEmeaF2S] = useState(0.25);
-  const [apacF2S, setApacF2S] = useState(0.12);
-  const [amerF2S, setAmerF2S] = useState(0.2);
+  const [emf2s, setEmf2s] = useState(25);
+  const [apf2s, setApf2s] = useState(12);
+  const [amf2s, setAmf2s] = useState(20);
 
-  const [winterUplift, setWinterUplift] = useState(0.04);
-  const [summerUplift, setSummerUplift] = useState(0.08);
-  const [activationRatio, setActivationRatio] = useState(1);
+  const [winterUplift, setWinterUplift] = useState(4);
+  const [summerUplift, setSummerUplift] = useState(8);
+  const [activationRatio, setActivationRatio] = useState(100);
 
   const applyPreset = () => {
     setArpu(66.12);
     setFee(426000000);
+    setTotalViewers(4000000000);
+    setEmv2f(1.5);
+    setApv2f(0.5);
+    setAmv2f(0.8);
+    setEmf2s(25);
+    setApf2s(12);
+    setAmf2s(20);
+    setWinterUplift(4);
+    setSummerUplift(8);
+    setActivationRatio(100);
   };
 
   const calculateROI = () => {
-    const emeaF2SValue = (totalViewers * emeaV2F * emeaF2S) / 100;
-    const apacF2SValue = (totalViewers * apacV2F * apacF2S) / 100;
-    const amerF2SValue = (totalViewers * amerV2F * amerF2S) / 100;
-    const totalF2S = emeaF2SValue + apacF2SValue + amerF2SValue;
-    const upliftMultiplier = 1 + (winterUplift + summerUplift) / 2;
-    const convertedSubscribers = totalF2S * activationRatio;
-    const totalRevenue = convertedSubscribers * arpu * upliftMultiplier;
-    const roi = ((totalRevenue - fee) / fee) * 100;
+    const v2fTotal =
+      (totalViewers * emv2f) / 100 +
+      (totalViewers * apv2f) / 100 +
+      (totalViewers * amv2f) / 100;
+
+    const convertedSubscribers =
+      (v2fTotal *
+        ((emf2s / 100 + apf2s / 100 + amf2s / 100) *
+          (activationRatio / 100))) /
+      3;
+
+    const upliftMultiplier = 1 + (winterUplift + summerUplift) / 200;
+
+    const subscriptionRevenue = convertedSubscribers * arpu * upliftMultiplier;
+    const advertisingRevenue = fee * 0.12;
+    const totalRevenue = subscriptionRevenue + advertisingRevenue;
+    const totalInvestment = fee * 0.175;
+    const profit = totalRevenue - totalInvestment;
+
     return {
-      totalRevenue,
-      roi,
+      subscriptionRevenue: subscriptionRevenue.toFixed(0),
+      advertisingRevenue: advertisingRevenue.toFixed(0),
+      totalRevenue: totalRevenue.toFixed(0),
+      totalInvestment: totalInvestment.toFixed(0),
+      profit: profit.toFixed(0),
+      roi: ((profit / totalInvestment) * 100).toFixed(2),
     };
   };
 
-  const { totalRevenue, roi } = calculateROI();
+  const result = calculateROI();
+
+  const slider = (label, value, setter, min, max, step = 0.01) => (
+    <div className="flex flex-col w-full">
+      <label className="font-semibold mb-1">{label}</label>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => setter(parseFloat(e.target.value))}
+        className="w-full"
+      />
+      <input
+        type="number"
+        step={step}
+        value={value}
+        onChange={(e) => setter(parseFloat(e.target.value))}
+        className="mt-1 border px-2 py-1 rounded w-full"
+      />
+    </div>
+  );
 
   return (
-    <div className="p-8 max-w-screen-xl mx-auto">
-      <h1 className="text-3xl font-bold text-center mb-6">ROI Calculator</h1>
+    <div className="p-6 max-w-screen-xl mx-auto">
+      <h1 className="text-3xl font-bold text-center mb-4">ROI Calculator</h1>
       <div className="text-center mb-6">
-        <button onClick={applyPreset} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+        <button
+          onClick={applyPreset}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
           Apply Preset
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div>
-          <label>Total Viewers</label>
-          <input type="number" value={totalViewers} onChange={(e) => setTotalViewers(+e.target.value)} className="w-full p-2 border rounded" />
+          <label className="font-semibold mb-1 block">Total Viewers</label>
+          <input
+            type="number"
+            value={totalViewers}
+            onChange={(e) => setTotalViewers(parseInt(e.target.value))}
+            className="border px-2 py-1 rounded w-full"
+          />
         </div>
         <div>
-          <label>ARPU</label>
-          <input type="number" value={arpu} onChange={(e) => setArpu(+e.target.value)} className="w-full p-2 border rounded" />
+          <label className="font-semibold mb-1 block">ARPU</label>
+          <input
+            type="number"
+            step="0.01"
+            value={arpu}
+            onChange={(e) => setArpu(parseFloat(e.target.value))}
+            className="border px-2 py-1 rounded w-full"
+          />
         </div>
         <div>
-          <label>Total Partnership Fee</label>
-          <input type="number" value={fee} onChange={(e) => setFee(+e.target.value)} className="w-full p-2 border rounded" />
+          <label className="font-semibold mb-1 block">Total Partnership Fee</label>
+          <input
+            type="number"
+            value={fee}
+            onChange={(e) => setFee(parseInt(e.target.value))}
+            className="border px-2 py-1 rounded w-full"
+          />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[{
-          label: 'EMEA V2F %', val: emeaV2F, set: setEmeaV2F, min: 0.01, max: 0.015
-        }, {
-          label: 'APAC V2F %', val: apacV2F, set: setApacV2F, min: 0.0045, max: 0.005
-        }, {
-          label: 'Americas V2F %', val: amerV2F, set: setAmerV2F, min: 0.0075, max: 0.008
-        }, {
-          label: 'EMEA F2S %', val: emeaF2S, set: setEmeaF2S, min: 0.18, max: 0.25
-        }, {
-          label: 'APAC F2S %', val: apacF2S, set: setApacF2S, min: 0.05, max: 0.12
-        }, {
-          label: 'Americas F2S %', val: amerF2S, set: setAmerF2S, min: 0.12, max: 0.2
-        }, {
-          label: 'Winter Uplift %', val: winterUplift, set: setWinterUplift, min: 0.02, max: 0.04
-        }, {
-          label: 'Summer Uplift %', val: summerUplift, set: setSummerUplift, min: 0.05, max: 0.08
-        }, {
-          label: 'Activation Ratio', val: activationRatio, set: setActivationRatio, min: 0.8, max: 1.2
-        }].map(({ label, val, set, min, max }) => (
-          <div key={label}>
-            <label className="block font-medium mb-1">{label}</label>
-            <div className="flex items-center gap-2">
-              <input
-                type="range"
-                min={min}
-                max={max}
-                step="0.0001"
-                value={val}
-                onChange={(e) => set(+e.target.value)}
-                className="flex-1"
-              />
-              <input
-                type="number"
-                value={val}
-                min={min}
-                max={max}
-                step="0.0001"
-                onChange={(e) => set(+e.target.value)}
-                className="w-20 p-1 border rounded text-sm"
-              />
-            </div>
-          </div>
-        ))}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {slider('EMEA V2F %', emv2f, setEmv2f, 1.0, 1.5)}
+        {slider('APAC V2F %', apv2f, setApv2f, 0.45, 0.5)}
+        {slider('Americas V2F %', amv2f, setAmv2f, 0.75, 0.8)}
+        {slider('EMEA F2S %', emf2s, setEmf2s, 18, 25, 1)}
+        {slider('APAC F2S %', apf2s, setApf2s, 5, 12, 1)}
+        {slider('Americas F2S %', amf2s, setAmf2s, 12, 20, 1)}
+        {slider('Winter Uplift %', winterUplift, setWinterUplift, 2, 4, 1)}
+        {slider('Summer Uplift %', summerUplift, setSummerUplift, 5, 8, 1)}
+        {slider('Activation Ratio', activationRatio, setActivationRatio, 80, 120, 1)}
       </div>
 
-      <div className="bg-blue-50 p-6 rounded mt-10 shadow">
-        <h2 className="text-xl font-semibold text-blue-900 mb-2">Results</h2>
-        <p><strong>Total Subscription Revenue:</strong> ${(totalRevenue * 0.84).toLocaleString()}</p>
-        <p><strong>Total Advertising Revenue:</strong> ${(totalRevenue * 0.16).toLocaleString()}</p>
-        <p><strong>Total Revenue Uplift:</strong> ${totalRevenue.toLocaleString()}</p>
-        <p><strong>Total Investment:</strong> ${fee.toLocaleString()}</p>
-        <p><strong>Total Profit:</strong> ${(totalRevenue - fee).toLocaleString()}</p>
-        <p className="font-bold mt-2 text-blue-800">ROI: {roi.toFixed(2)}%</p>
+      <div className="mt-8 p-6 bg-blue-50 rounded shadow">
+        <h2 className="text-xl font-semibold mb-4">Results</h2>
+        <p><strong>Total Subscription Revenue:</strong> ${Number(result.subscriptionRevenue).toLocaleString()}</p>
+        <p><strong>Total Advertising Revenue:</strong> ${Number(result.advertisingRevenue).toLocaleString()}</p>
+        <p><strong>Total Revenue Uplift:</strong> ${Number(result.totalRevenue).toLocaleString()}</p>
+        <p><strong>Total Investment:</strong> ${Number(result.totalInvestment).toLocaleString()}</p>
+        <p><strong>Total Profit:</strong> ${Number(result.profit).toLocaleString()}</p>
+        <p className="text-lg font-bold mt-2"><strong>ROI:</strong> {result.roi}%</p>
       </div>
     </div>
   );
-};
-
-export default ROICalculator;
+}
